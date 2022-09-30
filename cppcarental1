@@ -1,0 +1,319 @@
+#include<iostream>
+#include<conio.h>
+#include<fstream>
+using namespace std;
+const char* datafile="record.dat";
+class admincar{
+	private:
+		string password="";
+	protected:
+		char carname[50];
+		int price;
+	public:
+		void login();
+		void option();
+	    void read_data();
+		void show_data();
+		void write_rec();
+		void readone_rec();
+		void readall_rec();
+		void edit_rec();
+		void delete_rec();	
+		void customer_details();
+};
+class customercar{
+	protected:
+		char name[50];
+		char address[50];
+		int phone;
+     public:
+     	
+		 void getdata()
+		 {
+		 	cout<<"Enter your name : ";cin>>name;
+		 	cout<<"Enter your address: ";cin>>address;
+		 	cout<<"Enter your phoneno: ";cin>>phone;
+		 }
+};
+class person:public admincar,public customercar
+{
+	private:
+		int days;
+		int rent;
+	public:
+		void customer()
+     	{
+     		cout<<"***Welcome customer"<<endl;
+     		cout<<"**plese enter your details"<<endl;
+     		customercar::getdata();
+     		rentcar();
+		 }
+		 void rentcar()
+		 {
+		 	cout<<"\nchoose your car"<<endl;
+     		admincar::readall_rec();
+     		system("PAUSE");
+     		system("CLS");
+     		cout<<endl;
+     		admincar::readone_rec();
+     		cout<<"\nhow many day you want to rent:"<<endl;
+     		cin>>days;
+     		calculate_rent();
+		 }
+		 void calculate_rent()
+		 {
+		 	rent=days*price;
+		 	cout<<"Your rent is:"<<rent;
+		 	system("PAUSE");
+		    save_invoice();
+		 }
+		void invoice()
+		{
+			cout<<"This is invoice"<<endl;
+			cout<<"Customer name :"<<name<<endl;
+			cout<<"Customer Adddres:"<<address<<endl;
+			cout<<"Customer phoneno:"<<phone<<endl;
+			cout<<"Car rented :"<<carname<<endl;
+			cout<<"No ofdays:"<<days<<endl;
+			cout<<"Rent perday:"<<price<<endl;
+			cout<<"Total rent:"<<rent<<endl;
+						
+			
+		}
+		void save_invoice()
+		{
+		   ofstream outfile("Record.txt",ios::in|ios::out|ios::app|ios::trunc);
+	       invoice();
+ 	       outfile.write(reinterpret_cast<char*>(this),sizeof(*this));
+		}
+	
+		
+		
+		
+};
+void admincar::customer_details()
+{
+	ifstream infile("record.txt",ios::in|ios::out|ios::app);
+	if(!infile)
+	{
+		cout<<"file not found:store record first";
+		return;
+	}
+	cout<<"\n***Data from file**"<<endl;
+	while(!infile.eof())
+	{
+		infile.read(reinterpret_cast<char*>(this),sizeof(*this));
+		
+	}	
+}
+void admincar::login()
+{
+   char ch;
+   cout<<"\t\t\t\t\t------------------------------";
+   cout<<"\n\t\t\t\t\t\t     LOGIN \n";
+   cout<<"\t\t\t\t\t------------------------------\n\n";
+   cout << "\t\t\t\t\t Enter Password: ";
+   ch = _getch();
+   while(ch != 13){
+      password.push_back(ch);
+      cout << '*';
+      ch = _getch();
+   }
+   if(password == "admin"){
+      cout << "\n\n\n\t\t\t\t\t\tAccess Granted! \n";
+      system("PAUSE");
+      system ("CLS");
+     admincar::option();
+   }else{
+      cout << "\n\n\t\t\t\t\t\t\tAccess Aborted...\n\t\t\t\t\t\t\tPlease Try Again\n\n";
+      system("PAUSE");
+      system("CLS");
+      login();
+   }
+}
+void admincar::option()
+{
+	int choice;
+	cout<<"**Car rental system**"<<endl;
+	while(true)
+	{
+		cout<<"\nselect one option below:"<<endl;
+		cout<<"1.ADD CAR"<<endl;
+		cout<<"2.SHOW ALL CARS"<<endl;
+		cout<<"3.SHOW ONE CAR"<<endl;
+		cout<<"4.EDIT CAR"<<endl;
+		cout<<"5.Customer datails"<<endl;
+		cout<<"6.DELETE CAR"<<endl;
+		cout<<"7.EXIT"<<endl;
+		cin>>choice;     
+		switch(choice)    
+		{
+			case 1:
+				write_rec();
+				break;
+				case 2:
+					readall_rec();
+					break;
+					case 3:
+						readone_rec();
+						break;
+						case 4:
+							edit_rec();
+							break;
+							case 5:
+								customer_details();
+								break;
+							case 6:
+								delete_rec();
+								break;
+								case 7:
+									exit(0);
+									break;
+									default:
+										cout<<"\nchoice not available";
+										exit(0);
+		}
+		
+	}
+}
+void admincar::read_data()
+{
+	cout<<"\nEnter car name:";
+	cin>>carname;
+	cout<<"Enter rent per day:";
+	cin>>price;
+	cout<<endl;
+}
+void admincar::show_data()
+{
+	cout<<"CarName: "<<carname<<endl;
+	cout<<"rent per day : "<<price<<endl;
+	cout<<"-------------------------------------"<<endl;
+	
+}
+void admincar::write_rec()
+{
+	ofstream outfile(datafile,ios::binary|ios::app);
+	read_data();
+	outfile.write(reinterpret_cast<char*>(this),sizeof(*this));
+}
+void admincar::readall_rec()
+{
+	ifstream infile(datafile,ios::binary);
+	if(!infile)
+	{
+		cout<<"file not found:store record first";
+		return;
+	}
+	cout<<"\n***Data from file**"<<endl;
+	while(!infile.eof())
+	{
+		infile.read(reinterpret_cast<char*>(this),sizeof(*this));
+		show_data();
+	}	
+}
+void admincar::readone_rec()
+{
+	int n;
+	ifstream infile(datafile,ios::binary);
+	if(!infile)
+	{
+		cout<<"file not found:enter record first"<<endl;
+		return;
+	}
+	infile.seekg(0,ios::end);
+	int count=infile.tellg()/sizeof(*this);
+	cout<<"There are "<<count<<"cars available"<<endl;
+	cout<<"\nEnter car no:"<<endl;
+	cin>>n;
+	infile.seekg((n-1)*sizeof(*this));
+	infile.read(reinterpret_cast<char*>(this),sizeof(*this));
+	show_data();
+}
+void admincar::edit_rec()
+{
+	int n;
+	fstream iofile(datafile,ios::in|ios::binary);
+	if(!iofile)
+	{
+		cout<<"file not found:enter record first"<<endl;
+		return;
+	}
+	iofile.seekg(0,ios::end);
+	int count=iofile.tellg()/sizeof(*this);
+	cout<<"there are "<<count<<"car in the garage"<<endl;
+	cout<<"Enter record number to be edited"<<endl;
+	cin>>n;
+	iofile.seekg((n-1)*sizeof(*this));
+	iofile.read(reinterpret_cast<char*>(this),sizeof(*this));
+	cout<<"car"<<n<<"has the following detail"<<endl;
+	show_data();
+	iofile.close();
+	iofile.open(datafile,ios::in|ios::out|ios::binary);
+	iofile.seekp((n-1)*sizeof(*this));
+	cout<<"Enter data to modify:"<<endl;
+	read_data();
+	iofile.write(reinterpret_cast<char*>(this),sizeof(*this));
+}
+void admincar::delete_rec()
+{
+	int n;
+	char tempfile[]="temp.dat";
+	ifstream infile(datafile,ios::binary);
+	if(!infile)
+	{
+		cout<<"file not found:store data fist"<<endl;
+		return;
+	}
+	infile.seekg(0,ios::end);
+	int count=infile.tellg()/sizeof(*this);
+	cout<<"\n There are "<<count<<"cars in the file"<<endl;
+	cout<<"\nEnter record number to be deleted:";
+	cin>>n;
+	fstream tmpfile(tempfile,ios::out|ios::binary);
+	infile.seekg(0);
+	for(int i=0;i<count;++i)
+	{
+		infile.read(reinterpret_cast<char*>(this),sizeof(*this));
+		if(i==(n-1))
+		continue;
+		tmpfile.write(reinterpret_cast<char*>(this),sizeof(*this));
+	}
+	infile.close();
+	ofstream outfile(datafile,ios::binary);
+	tmpfile.close();
+	tmpfile.open(tempfile,ios::in|ios::binary);
+	for(int i=0;i<count-1;++i)
+	{
+		tmpfile.read(reinterpret_cast<char*>(this),sizeof(*this));
+		outfile.write(reinterpret_cast<char*>(this),sizeof(*this));
+	}
+	tmpfile.close();
+	remove(tempfile);
+}
+int main()
+{
+	person c;
+	int option;
+	cout<<"*****CAR RENTAL SYSTEM*****"<<endl;
+	cout<<"----------------------------\n\n";
+	cout<<"1.ADMIN"<<endl;
+	cout<<"2.Customer"<<endl;
+	cin>>option;
+	switch(option)
+	{
+		case 1:
+			c.admincar::login();
+			break;
+			case 2:
+				c.customer();
+				break;
+				default:
+					cout<<"Invalid input";
+					exit(0);
+					break;
+			
+	}
+	
+	return 0;
+}
